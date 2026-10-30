@@ -1,0 +1,50 @@
+appId: com.craftpulse.launcher
+productName: CraftPulse
+copyright: Copyright © 2026 Kurw1k
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**/*
+  - package.json
+  - '!**/*.map'
+extraResources:
+  - from: icon.png
+    to: icon.png
+asarUnpack:
+  - resources/**
+win:
+  icon: icon.png
+  target:
+    - target: nsis
+      arch:
+        - x64
+  artifactName: ${productName}-${version}-setup.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: CraftPulse
+linux:
+  icon: icon.png
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+  category: Game
+  maintainer: Kurw1k
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  desktop:
+    entry:
+      Name: CraftPulse
+      Comment: Minecraft server launcher
+      StartupWMClass: craftpulse
+mac:
+  category: Utilities
+  target:
+    - dmg
+    - zip
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+npmRebuild: false

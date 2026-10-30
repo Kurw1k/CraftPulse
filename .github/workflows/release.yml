@@ -1,0 +1,58 @@
+name: Build
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build installer (Windows)
+        if: matrix.os == 'windows-latest'
+        run: npm run dist:win -- --publish=never
+
+      - name: Build installer (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run dist:linux -- --publish=never
+
+      - name: Build macOS ARM64
+        if: matrix.os == 'macos-latest'
+        run: npm run dist -- --mac --arm64 --publish=never
+
+      - name: Build macOS Intel
+        if: matrix.os == 'macos-latest'
+        run: npm run dist -- --mac --x64 --publish=never
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CraftPulse-${{ matrix.os }}
+          path: release/*
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
